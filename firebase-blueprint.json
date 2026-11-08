@@ -1,0 +1,161 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with career preferences and role",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["seeker", "recruiter", "admin"] },
+        "headline": { "type": "string" },
+        "bio": { "type": "string" },
+        "skills": { "type": "array" },
+        "education": { "type": "string" },
+        "experience": { "type": "string" },
+        "portfolioUrl": { "type": "string" },
+        "resumeUrl": { "type": "string" },
+        "preferredRoles": { "type": "array" },
+        "preferredLocations": { "type": "array" },
+        "isPublic": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "name", "email", "role"]
+    },
+    "Job": {
+      "title": "Job",
+      "description": "Job or internship posting",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "companyName": { "type": "string" },
+        "companyId": { "type": "string" },
+        "location": { "type": "string" },
+        "jobType": { "type": "string" },
+        "experienceLevel": { "type": "string" },
+        "salaryMin": { "type": "number" },
+        "salaryMax": { "type": "number" },
+        "description": { "type": "string" },
+        "requirements": { "type": "string" },
+        "skills": { "type": "array" },
+        "postedBy": { "type": "string" },
+        "status": { "type": "string", "enum": ["open", "closed", "review"] },
+        "category": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "companyName", "location", "jobType", "postedBy", "status"]
+    },
+    "Application": {
+      "title": "Application",
+      "description": "Job application submission",
+      "type": "object",
+      "properties": {
+        "jobId": { "type": "string" },
+        "jobTitle": { "type": "string" },
+        "companyName": { "type": "string" },
+        "applicantId": { "type": "string" },
+        "applicantName": { "type": "string" },
+        "applicantEmail": { "type": "string" },
+        "resumeUrl": { "type": "string" },
+        "coverNote": { "type": "string" },
+        "status": { "type": "string" },
+        "recruiterNotes": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["jobId", "applicantId", "applicantName", "status"]
+    },
+    "SavedJob": {
+      "title": "SavedJob",
+      "description": "Bookmarked job",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "jobId": { "type": "string" },
+        "jobTitle": { "type": "string" },
+        "companyName": { "type": "string" },
+        "savedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "jobId"]
+    },
+    "Connection": {
+      "title": "Connection",
+      "description": "Professional networking relationship",
+      "type": "object",
+      "properties": {
+        "requesterId": { "type": "string" },
+        "requesterName": { "type": "string" },
+        "requesterHeadline": { "type": "string" },
+        "receiverId": { "type": "string" },
+        "receiverName": { "type": "string" },
+        "receiverHeadline": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "connected", "declined"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["requesterId", "receiverId", "status"]
+    },
+    "Post": {
+      "title": "Post",
+      "description": "Community networking feed post",
+      "type": "object",
+      "properties": {
+        "authorId": { "type": "string" },
+        "authorName": { "type": "string" },
+        "authorHeadline": { "type": "string" },
+        "content": { "type": "string" },
+        "mediaUrl": { "type": "string" },
+        "likesCount": { "type": "number" },
+        "commentsCount": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["authorId", "authorName", "content"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "Chat message in conversation",
+      "type": "object",
+      "properties": {
+        "conversationId": { "type": "string" },
+        "senderId": { "type": "string" },
+        "senderName": { "type": "string" },
+        "text": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["conversationId", "senderId", "text"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Individual user profile records"
+    },
+    "/jobs/{jobId}": {
+      "schema": { "$ref": "#/entities/Job" },
+      "description": "Published career listings"
+    },
+    "/applications/{applicationId}": {
+      "schema": { "$ref": "#/entities/Application" },
+      "description": "Job and internship applications"
+    },
+    "/savedJobs/{savedId}": {
+      "schema": { "$ref": "#/entities/SavedJob" },
+      "description": "Saved job records per user"
+    },
+    "/connections/{connectionId}": {
+      "schema": { "$ref": "#/entities/Connection" },
+      "description": "Professional connections"
+    },
+    "/posts/{postId}": {
+      "schema": { "$ref": "#/entities/Post" },
+      "description": "Activity feed posts"
+    },
+    "/conversations/{conversationId}/messages/{messageId}": {
+      "schema": { "$ref": "#/entities/Message" },
+      "description": "Direct messages between users"
+    }
+  }
+}

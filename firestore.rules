@@ -1,0 +1,111 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Users
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isOwner(userId)
+        && request.resource.data.userId == userId
+        && request.resource.data.name is string
+        && request.resource.data.email is string;
+      allow delete: if isOwner(userId);
+    }
+
+    // Jobs
+    match /jobs/{jobId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated()
+        && request.resource.data.postedBy == request.auth.uid
+        && request.resource.data.title is string
+        && request.resource.data.companyName is string;
+      allow update: if isAuthenticated()
+        && (resource.data.postedBy == request.auth.uid || request.auth.token.admin == true);
+      allow delete: if isAuthenticated()
+        && (resource.data.postedBy == request.auth.uid || request.auth.token.admin == true);
+    }
+
+    // Applications
+    match /applications/{applicationId} {
+      allow read: if isAuthenticated() && (
+        resource.data.applicantId == request.auth.uid ||
+        request.auth.token.admin == true
+      );
+      allow create: if isAuthenticated()
+        && request.resource.data.applicantId == request.auth.uid
+        && request.resource.data.jobId is string;
+      allow update: if isAuthenticated() && (
+        resource.data.applicantId == request.auth.uid ||
+        request.auth.token.admin == true
+      );
+      allow delete: if isAuthenticated() && resource.data.applicantId == request.auth.uid;
+    }
+
+    // Saved Jobs
+    match /savedJobs/{savedId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.jobId is string;
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    // Connections
+    match /connections/{connectionId} {
+      allow read: if isAuthenticated() && (
+        resource.data.requesterId == request.auth.uid ||
+        resource.data.receiverId == request.auth.uid
+      );
+      allow create: if isAuthenticated()
+        && request.resource.data.requesterId == request.auth.uid;
+      allow update: if isAuthenticated() && (
+        resource.data.requesterId == request.auth.uid ||
+        resource.data.receiverId == request.auth.uid
+      );
+      allow delete: if isAuthenticated() && (
+        resource.data.requesterId == request.auth.uid ||
+        resource.data.receiverId == request.auth.uid
+      );
+    }
+
+    // Posts
+    match /posts/{postId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated()
+        && request.resource.data.authorId == request.auth.uid
+        && request.resource.data.content is string;
+      allow update: if isAuthenticated() && (
+        resource.data.authorId == request.auth.uid ||
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likesCount', 'commentsCount'])
+      );
+      allow delete: if isAuthenticated() && resource.data.authorId == request.auth.uid;
+
+      match /comments/{commentId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated() && request.resource.data.authorId == request.auth.uid;
+        allow delete: if isAuthenticated() && resource.data.authorId == request.auth.uid;
+      }
+    }
+
+    // Conversations and Messages
+    match /conversations/{conversationId} {
+      allow read, write: if isAuthenticated() && (
+        request.auth.uid in resource.data.participantIds ||
+        request.auth.uid in request.resource.data.participantIds
+      );
+
+      match /messages/{messageId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated() && request.resource.data.senderId == request.auth.uid;
+      }
+    }
+  }
+}

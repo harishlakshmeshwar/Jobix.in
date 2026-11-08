@@ -1,0 +1,6 @@
+{
+  "name": "Jobix.in",
+  "description": "Full-stack career & recruitment platform with 3D UI, job search, networking, competitions, recruiter workspace, and admin dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
